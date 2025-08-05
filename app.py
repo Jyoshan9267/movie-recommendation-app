@@ -7,6 +7,12 @@ import seaborn as sns
 from collections import Counter
 # from streamlit.runtime.scriptrunner import rerun
 
+import pickle
+import requests
+import os
+import io
+
+
 
 # Shared footer
 def footer():
@@ -21,6 +27,26 @@ genre_id_map = {
     9648: 'Mystery', 10749: 'Romance', 878: 'Sci-Fi',
     10770: 'TV Movie', 53: 'Thriller', 10752: 'War', 37: 'Western'
 }
+
+# ⬇️ Load Pickle from URL
+def load_pickle_from_url(url):
+    response = requests.get(url)
+    response.raise_for_status()
+    return pickle.load(io.BytesIO(response.content))
+
+# 🌐 Load Files from GitHub
+movies_dict = load_pickle_from_url(
+    "https://github.com/Jyoshan9267/movie-recommendation-app/releases/download/v1.0.0/movies_dict.pkl"
+)
+vectorizer = load_pickle_from_url(
+    "https://github.com/Jyoshan9267/movie-recommendation-app/releases/download/v1.0.0/vectorizer.pkl"
+)
+similarity = load_pickle_from_url(
+    "https://github.com/Jyoshan9267/movie-recommendation-app/releases/download/v1.0.0/similarity.pkl"
+)
+
+movies = pd.DataFrame(movies_dict)
+
 
 # 🧠 Explain shared tags
 def explain_overlap(movie1, movie2):
@@ -64,10 +90,6 @@ def get_movie_details(row):
     return cast, director, genres, rating, year
 
 
-# 📦 Load Data
-movies_dict = pickle.load(open('movies_dict.pkl', 'rb'))
-movies = pd.DataFrame(movies_dict)
-similarity = pickle.load(open('similarity.pkl', 'rb'))
 
 # 🤖 Recommendation Logic
 def recommend(movie):
@@ -142,7 +164,16 @@ if page == "🎬 Recommendation":
             except Exception as e:
                 st.warning(f"❌ Could not process: {rec_title} — Reason: {e}")
 
-    footer()           
+    footer()       
+
+
+# ------------------------------
+# 📚 Other Pages...
+# ------------------------------
+# Keep your same logic for Movie History, Fun Facts, Quiz Mode
+# Just make sure to call `footer()` at the end of each page block
+
+
 
 # -------------------------------
 # Other Pages (Placeholder)
